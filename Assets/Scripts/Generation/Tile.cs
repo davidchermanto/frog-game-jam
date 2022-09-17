@@ -7,7 +7,16 @@ public class Tile : MonoBehaviour
     private int x;
     private int y;
 
-    private Sprite sprite;
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private SpriteRenderer borderRenderer;
+    [SerializeField] private BoxCollider2D box;
+
+    public bool availableToMoveTo;
+
+    public void Initialize(Sprite sprite)
+    {
+        spriteRenderer.sprite = sprite;
+    }
 
     public void SetCoordinates(int x, int y)
     {
@@ -22,9 +31,38 @@ public class Tile : MonoBehaviour
         transform.position = new Vector3(x * GlobalVars.tileSize, y * GlobalVars.tileSize, 0);
     }
 
-    public Sprite GetSprite()
+    void OnMouseEnter()
     {
-        return sprite;
+        if (availableToMoveTo)
+        {
+
+        }
+        else
+        {
+
+        }
+    }
+
+    void OnMouseExit()
+    {
+        if (availableToMoveTo)
+        {
+
+        }
+        else
+        {
+
+        }
+    }
+
+    private void BorderLightUp()
+    {
+
+    }
+
+    public SpriteRenderer GetSprite()
+    {
+        return spriteRenderer;
     }
 
     public int GetX()

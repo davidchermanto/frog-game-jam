@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private GenerateWorld generator;
+    [SerializeField] private World generator;
 
     void Start()
     {
