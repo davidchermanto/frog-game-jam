@@ -10,6 +10,8 @@ public class World : MonoBehaviour
     int currentTop;
     int currentBot;
 
+    int currentId;
+
     [SerializeField] private GameObject tilePrefab;
     [SerializeField] private GameObject tileFolder;
 
@@ -21,13 +23,15 @@ public class World : MonoBehaviour
 
     public void Generate()
     {
-        for(int i = 0; i < GlobalVars.boardSize; i++)
+        currentId = 0;
+
+        for (int i = 0; i < GlobalVars.boardSize; i++)
         {
-            for(int j = 0; j < GlobalVars.boardSize; j++)
+            for (int j = 0; j < GlobalVars.boardSize; j++)
             {
                 GameObject newTileObj = Instantiate(tilePrefab);
                 Tile newTile = newTileObj.GetComponent<Tile>();
-                newTile.Initialize(tileSet[Random.Range(0, tileSet.Count)]);
+                newTile.Initialize(tileSet[Random.Range(0, tileSet.Count)], this, currentId++);
                 newTile.SetCoordinates(i, j);
 
                 tiles.Add(newTile);
@@ -36,6 +40,27 @@ public class World : MonoBehaviour
         }
 
         frog.Initialize(this);
+    }
+
+    public void StartGame()
+    {
+
+    }
+
+    // When a mouse hovers over a tile, tile requests this
+    public void RequestHover(int id)
+    {
+
+    }
+
+    public void FinishPlayerTurn()
+    {
+        // Tick all other entities
+
+        // Adjust world
+
+        // Give turn back to player
+        frog.isPlayerTurn = true;
     }
 
     // Checks if tile is empty
@@ -51,6 +76,56 @@ public class World : MonoBehaviour
 
 
         return true;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="jump">If jump is false, then the function should calculate for tongue</param>
+    /// <returns></returns>
+    public bool TileReachableByPlayer(int x, int y, bool jump)
+    {
+        int playerRange;
+
+        if (jump)
+        {
+            playerRange = frog.GetJumpRange();
+        }
+        else
+        {
+            playerRange = frog.GetTongueRange();
+        }
+
+        int playerX = frog.GetX();
+        int playerY = frog.GetY();
+
+        // Up or down
+        if (playerX - x == 0)
+        {
+            if (Mathf.Abs(y - playerY) <= playerRange)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        // Left or right
+        if(playerY - y == 0)
+        {
+            if (Mathf.Abs(x - playerX) <= playerRange)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     // If player moves 3x to the left, then expand world by 3 tiles to the left

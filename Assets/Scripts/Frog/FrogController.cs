@@ -15,6 +15,8 @@ public class FrogController : MonoBehaviour
     private int jumpRange;
     private int tongueRange;
 
+    public bool isPlayerTurn;
+
     public void Initialize(World world)
     {
         this.world = world;
@@ -22,8 +24,8 @@ public class FrogController : MonoBehaviour
         currentX = GlobalVars.boardSize / 2;
         currentY = GlobalVars.boardSize / 2;
 
-        jumpRange = 3;
-        tongueRange = 5;
+        jumpRange = GlobalVars.baseJumpRange;
+        tongueRange = GlobalVars.baseTongueRange;
 
         AdjustPosition();
     }
@@ -63,7 +65,14 @@ public class FrogController : MonoBehaviour
     // Animates moving to the new "Current Position"
     public void MoveAnim(string direction, int targetX, int targetY)
     {
+        StartCoroutine(MoveAnim(currentX, targetX, currentY, targetY));
 
+    }
+
+    public void FinishTurn()
+    {
+        isPlayerTurn = false;
+        world.FinishPlayerTurn();
     }
 
     public void AdjustPosition()
@@ -79,5 +88,43 @@ public class FrogController : MonoBehaviour
     public int GetY()
     {
         return currentY;
+    }
+
+    public int GetJumpRange()
+    {
+        return jumpRange;
+    }
+
+    public int GetTongueRange()
+    {
+        return tongueRange;
+    }
+
+    // Moves the player and ends their turn after
+    private IEnumerator MoveAnim(int oldX, int newX, int oldY, int newY)
+    {
+        // Coordinate calculation
+        float coordOldX = oldX * GlobalVars.tileSize;
+        float coordOldY = oldY * GlobalVars.tileSize;
+
+        float coordNewX = newX * GlobalVars.tileSize;
+        float coordNewY = newY * GlobalVars.tileSize;
+
+        float duration = 0.3f;
+        float progress = 0;
+
+        while (progress < 1)
+        {
+            progress += duration * Time.deltaTime;
+            transform.position = Vector3.Lerp(new Vector3(coordOldX, coordOldY, 0), 
+                new Vector3(coordNewX, coordNewY, 0), progress);
+
+            yield return new WaitForFixedUpdate();
+        }
+
+        currentX = newX;
+        currentY = newY;
+
+        FinishTurn();
     }
 }

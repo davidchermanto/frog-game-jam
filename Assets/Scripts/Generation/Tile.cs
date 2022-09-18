@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
+    private int id;
+    
     private int x;
     private int y;
 
@@ -11,11 +13,15 @@ public class Tile : MonoBehaviour
     [SerializeField] private SpriteRenderer borderRenderer;
     [SerializeField] private BoxCollider2D box;
 
+    private World world;
+
     public bool availableToMoveTo;
 
-    public void Initialize(Sprite sprite)
+    public void Initialize(Sprite sprite, World world, int id)
     {
         spriteRenderer.sprite = sprite;
+        this.world = world;
+        this.id = id;
     }
 
     public void SetCoordinates(int x, int y)
