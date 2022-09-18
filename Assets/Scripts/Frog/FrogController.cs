@@ -30,31 +30,25 @@ public class FrogController : MonoBehaviour
         AdjustPosition();
     }
 
-    public void MoveTo(string direction, int force)
+    public void MoveTo(string direction, int targetX, int targetY)
     {
-        int forceX = 0;
-        int forceY = 0;
-
         switch (direction)
         {
             case "up":
-                forceY += force;
+                transform.rotation = Quaternion.Euler(new Vector3(0, 0, 270));
                 break;
             case "down":
-                forceY -= force;
+                transform.rotation = Quaternion.Euler(new Vector3(0, 0, 90));
                 break;
             case "left":
-                forceX -= force;
+                transform.rotation = Quaternion.Euler(new Vector3(0, 0, 180));
                 break;
             case "right":
-                forceX += force;
+                transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
                 break;
             default:
                 break;
         }
-
-        int targetX = currentX + forceX;
-        int targetY = currentY - forceY;
 
         if(world.CheckTileEmpty(targetX, targetY))
         {
@@ -110,12 +104,12 @@ public class FrogController : MonoBehaviour
         float coordNewX = newX * GlobalVars.tileSize;
         float coordNewY = newY * GlobalVars.tileSize;
 
-        float duration = 0.3f;
+        float duration = 0.12f;
         float progress = 0;
 
         while (progress < 1)
         {
-            progress += duration * Time.deltaTime;
+            progress += 1 / duration * Time.deltaTime;
             transform.position = Vector3.Lerp(new Vector3(coordOldX, coordOldY, 0), 
                 new Vector3(coordNewX, coordNewY, 0), progress);
 

@@ -15,6 +15,11 @@ public class Tile : MonoBehaviour
 
     private World world;
 
+    // Base color
+    private float r = 0.67f;
+    private float g = 0.56f;
+    private float b = 0.23f;
+
     public bool availableToMoveTo;
 
     public void Initialize(Sprite sprite, World world, int id)
@@ -39,31 +44,42 @@ public class Tile : MonoBehaviour
 
     void OnMouseEnter()
     {
-        if (availableToMoveTo)
-        {
-
-        }
-        else
-        {
-
-        }
+        //Debug.Log(x + " / " + y);
+        world.RequestHover(this);
     }
 
     void OnMouseExit()
     {
-        if (availableToMoveTo)
+        if (world.GetReachableTiles().Contains(this))
         {
-
+            BorderSemiLight();
         }
         else
         {
-
+            BorderDimDown();
         }
     }
 
-    private void BorderLightUp()
+    void OnMouseDown()
     {
+        world.RequestMove(this);
+    }
 
+    // Lights up the border, indicating that the tile is available to move to
+    public void BorderLightUp()
+    {
+        borderRenderer.color = new Color(1, g, b, 1);
+    }
+
+    // Lights up semi, meaning it might be possible to move there
+    public void BorderSemiLight()
+    {
+        borderRenderer.color = new Color(r, g, b, 0.3f);
+    }
+
+    public void BorderDimDown()
+    {
+        borderRenderer.color = new Color(r, g, b, 0.1f);
     }
 
     public SpriteRenderer GetSprite()
