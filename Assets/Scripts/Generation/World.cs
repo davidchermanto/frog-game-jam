@@ -83,38 +83,41 @@ public class World : MonoBehaviour
             int tileX = tile.GetX();
             int tileY = tile.GetY();
 
-            string direction = "";
+            if(TileReachableByPlayer(tileX, tileY, jumping))
+            {
+                string direction = "";
 
-            // Top / down
-            if (tileY > frogY)
-            {
-                direction = "up";
-            }
-            else if (tileY < frogY)
-            {
-                direction = "down";
-            }
-            // Left / Right
-            if (tileX > frogX)
-            {
-                direction = "left";
-            }
-            else if (tileX < frogX)
-            {
-                direction = "right";
-            }
-
-            if (jumping)
-            {
-                // Try to move towards the tile
-                if(CheckTileEmpty(tileX, tileY))
+                // Top / down
+                if (tileY > frogY)
                 {
-                    frog.MoveTo(direction, tileX, tileY);
+                    direction = "up";
                 }
-            }
-            else
-            {
-                // Tongue
+                else if (tileY < frogY)
+                {
+                    direction = "down";
+                }
+                // Left / Right
+                if (tileX > frogX)
+                {
+                    direction = "left";
+                }
+                else if (tileX < frogX)
+                {
+                    direction = "right";
+                }
+
+                if (jumping)
+                {
+                    // Try to move towards the tile
+                    if (CheckTileEmpty(tileX, tileY))
+                    {
+                        frog.MoveTo(direction, tileX, tileY);
+                    }
+                }
+                else
+                {
+                    // Tongue
+                }
             }
         }
     }
