@@ -42,7 +42,7 @@ public class Tile : MonoBehaviour
         transform.position = new Vector3(x * GlobalVars.tileSize, y * GlobalVars.tileSize, 0);
     }
 
-    void OnMouseEnter()
+    void OnMouseOver()
     {
         //Debug.Log(x + " / " + y);
         world.RequestHover(this);
@@ -69,6 +69,11 @@ public class Tile : MonoBehaviour
     public void BorderLightUp()
     {
         borderRenderer.color = new Color(1, g, b, 1);
+    }
+
+    public void BorderTongueLightUp()
+    {
+        borderRenderer.color = new Color(r, 1, b, 1);
     }
 
     // Lights up semi, meaning it might be possible to move there

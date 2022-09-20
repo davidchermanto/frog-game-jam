@@ -2,35 +2,68 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FrogController : MonoBehaviour
+public class FlyController : MonoBehaviour
 {
     private World world;
 
     private int currentX;
     private int currentY;
 
-    private float currentSanity;
-    private float maxSanity;
+    [SerializeField] private SpriteRenderer flySprite;
 
-    private int jumpRange;
-    private int tongueRange;
-
-    public bool isPlayerTurn;
-
-    public void Initialize(World world)
+    public void Initialize(World world, int x, int y)
     {
         this.world = world;
-        
-        currentX = GlobalVars.boardSize / 2;
-        currentY = GlobalVars.boardSize / 2;
 
-        jumpRange = GlobalVars.baseJumpRange;
-        tongueRange = GlobalVars.baseTongueRange;
+        currentX = x;
+        currentY = y;
 
         AdjustPosition();
     }
 
+    public void Tick()
+    {
+        int rand = Random.Range(0, 3);
+        string direction = "";
+        int targetX = currentX;
+        int targetY = currentY;
+
+        switch (rand)
+        {
+            case 0:
+                direction = "up";
+                targetY++;
+                break;
+            case 1:
+                direction = "down";
+                targetY--;
+                break;
+            case 2:
+                direction = "left";
+                targetX--;
+                break;
+            case 3:
+                direction = "right";
+                targetX++;
+                break;
+            default:
+                break;
+        }
+
+        MoveTo(direction, targetX, targetY);
+    }
+
     public void MoveTo(string direction, int targetX, int targetY)
+    {
+        if (world.CheckTileEmpty(targetX, targetY))
+        {
+            Face(direction);
+
+            MoveAnim(direction, targetX, targetY);
+        }
+    }
+
+    public void Face(string direction)
     {
         switch (direction)
         {
@@ -49,49 +82,11 @@ public class FrogController : MonoBehaviour
             default:
                 break;
         }
-
-        if(world.CheckTileEmpty(targetX, targetY))
-        {
-            MoveAnim(direction, targetX, targetY);
-        }
     }
 
-    // Animates moving to the new "Current Position"
     public void MoveAnim(string direction, int targetX, int targetY)
     {
         StartCoroutine(MoveAnim(currentX, targetX, currentY, targetY));
-
-    }
-
-    public void FinishTurn()
-    {
-        isPlayerTurn = false;
-        world.FinishPlayerTurn();
-    }
-
-    public void AdjustPosition()
-    {
-        transform.position = new Vector3(currentX * GlobalVars.tileSize, currentY * GlobalVars.tileSize, 0);
-    }
-
-    public int GetX()
-    {
-        return currentX;
-    }
-
-    public int GetY()
-    {
-        return currentY;
-    }
-
-    public int GetJumpRange()
-    {
-        return jumpRange;
-    }
-
-    public int GetTongueRange()
-    {
-        return tongueRange;
     }
 
     // Moves the player and ends their turn after
@@ -110,7 +105,7 @@ public class FrogController : MonoBehaviour
         while (progress < 1)
         {
             progress += 1 / duration * Time.deltaTime;
-            transform.position = Vector3.Lerp(new Vector3(coordOldX, coordOldY, 0), 
+            transform.position = Vector3.Lerp(new Vector3(coordOldX, coordOldY, 0),
                 new Vector3(coordNewX, coordNewY, 0), progress);
 
             yield return new WaitForFixedUpdate();
@@ -118,7 +113,20 @@ public class FrogController : MonoBehaviour
 
         currentX = newX;
         currentY = newY;
+    }
 
-        FinishTurn();
+    public void AdjustPosition()
+    {
+        transform.position = new Vector3(currentX * GlobalVars.tileSize, currentY * GlobalVars.tileSize, 0);
+    }
+
+    public int GetX()
+    {
+        return currentX;
+    }
+
+    public int GetY()
+    {
+        return currentY;
     }
 }

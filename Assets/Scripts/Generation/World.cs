@@ -1,32 +1,50 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class World : MonoBehaviour
 {
-    // The corners of the world in size, x and y
-    int currentLeft;
-    int currentRight;
-    int currentTop;
-    int currentBot;
-
     int currentId;
 
     [SerializeField] private GameObject tilePrefab;
     [SerializeField] private GameObject tileFolder;
 
     [SerializeField] private List<Sprite> tileSet;
+    [SerializeField] private GameObject flyPrefab;
 
     [SerializeField] private FrogController frog;
 
     private List<Tile> tiles = new List<Tile>();
     private List<Tile> currentReachableTiles = new List<Tile>();
 
+    private List<FlyController> flies = new List<FlyController>();
+
     // If the mode is jumping. If false, then its tongueing
     private bool jumping;
 
     private bool isPlaying;
     private bool isPaused;
+
+    // Button
+    [SerializeField] private Image leap;
+    [SerializeField] private Image tongue;
+
+    void Update()
+    {
+        if (isPlaying)
+        {
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                SetJump();
+            }
+
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                SetTongue();
+            }
+        }
+    }
 
     public void Generate()
     {
@@ -47,12 +65,18 @@ public class World : MonoBehaviour
         }
 
         frog.Initialize(this);
+
+        for(int i = 0; i < GlobalVars.initialFlies; i++)
+        {
+            SpawnFly();
+        }
     }
 
     public void StartGame()
     {
         jumping = true;
         isPlaying = true;
+
         StartPlayerTurn();
         // TODO
     }
@@ -65,9 +89,13 @@ public class World : MonoBehaviour
             bool playerCanReach = TileReachableByPlayer(tile.GetX(), tile.GetY(), jumping);
             bool isTileEmpty = CheckTileEmpty(tile.GetX(), tile.GetY());
 
-            if (playerCanReach && isTileEmpty)
+            if (jumping && playerCanReach && isTileEmpty)
             {
                 tile.BorderLightUp();
+            }
+            else if (playerCanReach)
+            {
+                tile.BorderTongueLightUp();
             }
         }
     }
@@ -114,9 +142,22 @@ public class World : MonoBehaviour
                         frog.MoveTo(direction, tileX, tileY);
                     }
                 }
-                else
+                else if(!(frog.GetX() == tileX && frog.GetY() == tileY))
                 {
                     // Tongue
+                    FlyController fly = CheckTileForFlies(tile);
+
+                    frog.Face(direction);
+                    frog.TryTongue(tileX, tileY);
+
+                    if(fly != null)
+                    {
+                        // Kill fly
+                        flies.Remove(fly);
+                        GameObject destroyedFly = fly.gameObject;
+
+                        Destroy(destroyedFly);
+                    }
                 }
             }
         }
@@ -124,7 +165,56 @@ public class World : MonoBehaviour
 
     public void StartPlayerTurn()
     {
-        foreach(Tile tile in currentReachableTiles)
+        UpdateRangeDisplay();
+
+        frog.isPlayerTurn = true;
+    }
+
+    public void SpawnFly()
+    {
+        // Pick spawn spot
+        int min = 0;
+        int max = GlobalVars.boardSize;
+
+        int randX = Random.Range(min, max);
+        int randY = Random.Range(min, max);
+
+        int rand = Random.Range(0, 3);
+        string direction = "";
+
+        if (CheckTileEmpty(randX, randY))
+        {
+            GameObject newFly = Instantiate(flyPrefab);
+            FlyController newFlyController = newFly.GetComponent<FlyController>();
+            newFlyController.Initialize(this, randX, randY);
+
+            switch (rand)
+            {
+                case 0:
+                    direction = "up";
+                    break;
+                case 1:
+                    direction = "down";
+                    break;
+                case 2:
+                    direction = "left";
+                    break;
+                case 3:
+                    direction = "right";
+                    break;
+                default:
+                    break;
+            }
+
+            newFlyController.Face(direction);
+
+            flies.Add(newFlyController);
+        }
+    }
+
+    public void UpdateRangeDisplay()
+    {
+        foreach (Tile tile in currentReachableTiles)
         {
             tile.BorderDimDown();
         }
@@ -135,15 +225,27 @@ public class World : MonoBehaviour
         {
             tile.BorderSemiLight();
         }
-
-        frog.isPlayerTurn = true;
     }
 
     public void FinishPlayerTurn()
     {
-        // Tick all other entities
+        StartCoroutine(FinishPlayerTurnCor());
+    }
 
-        // Adjust world
+    public IEnumerator FinishPlayerTurnCor()
+    {
+        // Tick all other entities
+        foreach (FlyController fly in flies)
+        {
+            fly.Tick();
+        }
+
+        yield return new WaitForEndOfFrame();
+
+        if(Random.Range(0, 1f) > 0.3f)
+        {
+            SpawnFly();
+        }
 
         // Give turn back to player
         StartPlayerTurn();
@@ -164,17 +266,45 @@ public class World : MonoBehaviour
         return inRanges;
     }
 
+    public FlyController CheckTileForFlies(Tile tile)
+    {
+        foreach(FlyController fly in flies)
+        {
+            if(fly.GetX() == tile.GetX() && fly.GetY() == tile.GetY())
+            {
+                return fly;
+            }
+        }
+
+        return null;
+    }
+
     // Checks if tile is empty
     public bool CheckTileEmpty(int currentX, int currentY)
     {
-        // Check for player
-        if(frog.GetX() == currentX && frog.GetY() == currentY)
+        if(currentX < 0 || currentX > GlobalVars.boardSize)
         {
             return false;
         }
 
-        // Todo: Check for entity
+        if (currentY < 0 || currentY > GlobalVars.boardSize)
+        {
+            return false;
+        }
 
+        // Check for player
+        if (frog.GetX() == currentX && frog.GetY() == currentY)
+        {
+            return false;
+        }
+
+        foreach(FlyController fly in flies)
+        {
+            if(fly.GetX() == currentX && fly.GetY() == currentY)
+            {
+                return false;
+            }
+        }
 
         return true;
     }
@@ -227,6 +357,26 @@ public class World : MonoBehaviour
         }
 
         return false;
+    }
+
+    public void SetJump()
+    {
+        jumping = true;
+
+        leap.color = new Color(1, 1, 1);
+        tongue.color = new Color(0.4f, 0.4f, 0.4f);
+
+        UpdateRangeDisplay();
+    }
+
+    public void SetTongue()
+    {
+        jumping = false;
+
+        tongue.color = new Color(1, 1, 1);
+        leap.color = new Color(0.4f, 0.4f, 0.4f);
+
+        UpdateRangeDisplay();
     }
 
     // If player moves 3x to the left, then expand world by 3 tiles to the left
