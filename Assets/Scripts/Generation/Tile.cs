@@ -52,7 +52,14 @@ public class Tile : MonoBehaviour
     {
         if (world.GetReachableTiles().Contains(this))
         {
-            BorderSemiLight();
+            if (world.isJumping())
+            {
+                BorderSemiLight();
+            }
+            else
+            {
+                BorderTongueSemiLight();
+            }
         }
         else
         {
@@ -80,6 +87,11 @@ public class Tile : MonoBehaviour
     public void BorderSemiLight()
     {
         borderRenderer.color = new Color(r, g, b, 0.3f);
+    }
+
+    public void BorderTongueSemiLight()
+    {
+        borderRenderer.color = new Color(r * 0.7f, g * 1.2f, b, 0.3f);
     }
 
     public void BorderDimDown()

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class World : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class World : MonoBehaviour
 
     [SerializeField] private List<Sprite> tileSet;
     [SerializeField] private GameObject flyPrefab;
+    [SerializeField] private GameObject impact;
 
     [SerializeField] private FrogController frog;
 
@@ -24,7 +26,14 @@ public class World : MonoBehaviour
     private bool jumping;
 
     private bool isPlaying;
-    private bool isPaused;
+
+    private float currentSanity;
+    private float maxSanity;
+
+    private double score;
+
+    [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private Image sanityBar;
 
     // Button
     [SerializeField] private Image leap;
@@ -34,14 +43,16 @@ public class World : MonoBehaviour
     {
         if (isPlaying)
         {
-            if (Input.GetKeyDown(KeyCode.A))
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                SetJump();
-            }
-
-            if (Input.GetKeyDown(KeyCode.D))
-            {
-                SetTongue();
+                if (jumping)
+                {
+                    SetTongue();
+                }
+                else
+                {
+                    SetJump();
+                }
             }
         }
     }
@@ -66,7 +77,10 @@ public class World : MonoBehaviour
 
         frog.Initialize(this);
 
-        for(int i = 0; i < GlobalVars.initialFlies; i++)
+        maxSanity = GlobalVars.maxSanity;
+        currentSanity = GlobalVars.maxSanity;
+
+        for (int i = 0; i < GlobalVars.initialFlies; i++)
         {
             SpawnFly();
         }
@@ -76,7 +90,10 @@ public class World : MonoBehaviour
     {
         jumping = true;
         isPlaying = true;
+        score = 0;
 
+        StartCoroutine(UpdateUI());
+        StartCoroutine(DepleteSanity());
         StartPlayerTurn();
         // TODO
     }
@@ -156,7 +173,13 @@ public class World : MonoBehaviour
                         flies.Remove(fly);
                         GameObject destroyedFly = fly.gameObject;
 
+                        GameObject newImpact = Instantiate(impact);
+                        newImpact.transform.position = new Vector3(tileX * GlobalVars.tileSize, tileY * GlobalVars.tileSize, 0);
+
                         Destroy(destroyedFly);
+
+                        score += GlobalVars.scorePerFly;
+                        currentSanity += GlobalVars.sanityPerFly;
                     }
                 }
             }
@@ -206,6 +229,9 @@ public class World : MonoBehaviour
                     break;
             }
 
+            GameObject newImpact = Instantiate(impact);
+            newImpact.transform.position = new Vector3(randX * GlobalVars.tileSize, randY * GlobalVars.tileSize, 0);
+
             newFlyController.Face(direction);
 
             flies.Add(newFlyController);
@@ -223,7 +249,14 @@ public class World : MonoBehaviour
         currentReachableTiles = GetTilesInFrogRange();
         foreach (Tile tile in currentReachableTiles)
         {
-            tile.BorderSemiLight();
+            if (jumping)
+            {
+                tile.BorderSemiLight();
+            }
+            else
+            {
+                tile.BorderTongueSemiLight();
+            }
         }
     }
 
@@ -242,10 +275,10 @@ public class World : MonoBehaviour
 
         yield return new WaitForEndOfFrame();
 
-        if(Random.Range(0, 1f) > 0.3f)
-        {
-            SpawnFly();
-        }
+        SpawnFly();
+
+        currentSanity += GlobalVars.sanityPerTurn;
+        score += GlobalVars.scorePerTurn;
 
         // Give turn back to player
         StartPlayerTurn();
@@ -359,6 +392,12 @@ public class World : MonoBehaviour
         return false;
     }
 
+    public void GameOver()
+    {
+        isPlaying = false;
+
+    }
+
     public void SetJump()
     {
         jumping = true;
@@ -379,14 +418,40 @@ public class World : MonoBehaviour
         UpdateRangeDisplay();
     }
 
-    // If player moves 3x to the left, then expand world by 3 tiles to the left
-    public void AdjustWorld(int moveX, int moveY)
+    public IEnumerator DepleteSanity()
     {
+        while (isPlaying)
+        {
+            currentSanity += Time.deltaTime * GlobalVars.sanityPerSecond;
 
+            if (currentSanity <= 0)
+            {
+                GameOver();
+            }
+
+            yield return new WaitForFixedUpdate();
+        }
+    }
+
+    // This is bad practice, but this is a game jam so...
+    public IEnumerator UpdateUI()
+    {
+        while (isPlaying)
+        {
+            sanityBar.fillAmount = currentSanity / maxSanity;
+            scoreText.text = score.ToString();
+
+            yield return new WaitForFixedUpdate();
+        }
     }
 
     public List<Tile> GetReachableTiles()
     {
         return currentReachableTiles;
+    }
+
+    public bool isJumping()
+    {
+        return jumping;
     }
 }

@@ -23,7 +23,7 @@ public class FlyController : MonoBehaviour
 
     public void Tick()
     {
-        int rand = Random.Range(0, 3);
+        int rand = Random.Range(0, 4);
         string direction = "";
         int targetX = currentX;
         int targetY = currentY;

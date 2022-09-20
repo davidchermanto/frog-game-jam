@@ -9,9 +9,6 @@ public class FrogController : MonoBehaviour
     private int currentX;
     private int currentY;
 
-    private float currentSanity;
-    private float maxSanity;
-
     private int jumpRange;
     private int tongueRange;
 
@@ -29,9 +26,6 @@ public class FrogController : MonoBehaviour
 
         jumpRange = GlobalVars.baseJumpRange;
         tongueRange = GlobalVars.baseTongueRange;
-
-        maxSanity = GlobalVars.maxSanity;
-        currentSanity = GlobalVars.maxSanity;
 
         AdjustPosition();
     }
