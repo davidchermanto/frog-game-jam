@@ -39,6 +39,12 @@ public class World : MonoBehaviour
     [SerializeField] private Image leap;
     [SerializeField] private Image tongue;
 
+    [SerializeField] private Canvas gameOverCanvas;
+    [SerializeField] private TextMeshProUGUI gameOverScore;
+
+    bool shifted1 = false;
+    bool shifted2 = false;
+
     void Update()
     {
         if (isPlaying)
@@ -59,6 +65,20 @@ public class World : MonoBehaviour
 
     public void Generate()
     {
+        foreach(Tile tile in tiles)
+        {
+            Destroy(tile.gameObject);
+        }
+
+        tiles = new List<Tile>();
+
+        foreach(FlyController fly in flies)
+        {
+            Destroy(fly.gameObject);
+        }
+
+        flies = new List<FlyController>();
+
         currentId = 0;
 
         for (int i = 0; i < GlobalVars.boardSize; i++)
@@ -88,6 +108,8 @@ public class World : MonoBehaviour
 
     public void StartGame()
     {
+        shifted1 = false;
+        shifted2 = false;
         jumping = true;
         isPlaying = true;
         score = 0;
@@ -170,6 +192,7 @@ public class World : MonoBehaviour
                     if(fly != null)
                     {
                         // Kill fly
+                        SFXController.Instance.PlayClip(1);
                         flies.Remove(fly);
                         GameObject destroyedFly = fly.gameObject;
 
@@ -180,6 +203,10 @@ public class World : MonoBehaviour
 
                         score += GlobalVars.scorePerFly;
                         currentSanity += GlobalVars.sanityPerFly;
+                    }
+                    else
+                    {
+                        SFXController.Instance.PlayClip(4);
                     }
                 }
             }
@@ -315,12 +342,12 @@ public class World : MonoBehaviour
     // Checks if tile is empty
     public bool CheckTileEmpty(int currentX, int currentY)
     {
-        if(currentX < 0 || currentX > GlobalVars.boardSize)
+        if(currentX < 0 || currentX > GlobalVars.boardSize - 1)
         {
             return false;
         }
 
-        if (currentY < 0 || currentY > GlobalVars.boardSize)
+        if (currentY < 0 || currentY > GlobalVars.boardSize - 1)
         {
             return false;
         }
@@ -395,7 +422,9 @@ public class World : MonoBehaviour
     public void GameOver()
     {
         isPlaying = false;
-
+        gameOverScore.SetText(score.ToString());
+        gameOverCanvas.gameObject.SetActive(true);
+        SFXController.Instance.PlayClip(3);
     }
 
     public void SetJump()
@@ -424,8 +453,24 @@ public class World : MonoBehaviour
         {
             currentSanity += Time.deltaTime * GlobalVars.sanityPerSecond;
 
+            if(currentSanity < 33 || shifted2)
+            {
+                MusicController.Instance.Play4();
+                shifted2 = true;
+            }
+            else if (currentSanity < 66 || shifted1)
+            {
+                MusicController.Instance.Play3();
+                shifted1 = true;
+            }
+            else
+            {
+                MusicController.Instance.Play2();
+            }
+
             if (currentSanity <= 0)
             {
+                MusicController.Instance.Play1();
                 GameOver();
             }
 

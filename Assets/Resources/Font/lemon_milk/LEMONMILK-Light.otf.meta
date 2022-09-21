@@ -1,0 +1,27 @@
+fileFormatVersion: 2
+guid: b78b7bdecfbfad9429edf933d8a78e49
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: LEMON MILK
+  fontNames:
+  - LEMON MILK
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 904e27137d2227141bd162716ed51d11, type: 3}
+  - {fileID: 12800000, guid: b12796f66bda5e941bf3e4ccf87a3957, type: 3}
+  - {fileID: 12800000, guid: 45a8b55da6e7f0f48b60bb56bd9ae5d8, type: 3}
+  - {fileID: 12800000, guid: 64ebf57ee2458cf4693b7b9ba315fa61, type: 3}
+  - {fileID: 12800000, guid: 87dfd7cfd0385b04fb420956c242be02, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -6,9 +6,15 @@ public class GameManager : MonoBehaviour
 {
     [SerializeField] private World world;
 
-    void Start()
+    [SerializeField] private GameObject gameOverCanvas;
+    [SerializeField] private GameObject menuCanvas;
+
+    public void StartGame()
     {
+        SFXController.Instance.PlayClip(0);
         world.Generate();
         world.StartGame();
+        gameOverCanvas.SetActive(false);
+        menuCanvas.SetActive(false);
     }
 }

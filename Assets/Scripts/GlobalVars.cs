@@ -11,12 +11,12 @@ public static class GlobalVars
     public static int baseTongueRange = 5;
 
     public static float maxSanity = 100;
-    public static float sanityPerSecond = -2f;
+    public static float sanityPerSecond = -2.5f;
     public static float sanityPerTurn = -2f;
     public static float sanityPerFly = 6;
 
     public static float scorePerTurn = 10;
-    public static float scorePerFly = 15;
+    public static float scorePerFly = 250;
 
-    public static int initialFlies = 46;
+    public static int initialFlies = 60;
 }

@@ -36,6 +36,7 @@ public class FrogController : MonoBehaviour
 
         if(world.CheckTileEmpty(targetX, targetY))
         {
+            SFXController.Instance.PlayClip(2);
             MoveAnim(direction, targetX, targetY);
         }
     }
